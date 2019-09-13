@@ -3,7 +3,9 @@ import seaborn as sns
 from sklearn.preprocessing import  RobustScaler # less prone to outliers
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
 from matplotlib import pyplot as plt
+
 cc_data = pd.read_csv('dataset/creditcard.csv',header=0)
 cc_data.Class = pd.Categorical(cc_data.Class)
 print(cc_data.head())
@@ -29,9 +31,13 @@ print(features['Amount'].describe())
 cc_data['scaled_amount'] = RobustScaler().fit_transform(cc_data.Amount.values.reshape(-1, 1))
 cc_data.drop(['Amount'],axis=1,inplace=True)
 print(cc_data.head())
-X = cc_data.drop(['Class'], axis=1)
-
-X_train, y_train, x_test, y_test = train_test_split(X, label)
+X = cc_data.loc[:, cc_data.columns!='Class']
+y = cc_data.iloc[:,-1]
+print(X.shape)
+print(y.shape)
+X_train, y_train, x_test, y_test = train_test_split(X, y)
 clf = LogisticRegression()
 clf.fit(X_train,y_train)
+print(clf.score(x_test,y_test))
+print(r2_score(y_test,clf.predict(x_test)))
 
