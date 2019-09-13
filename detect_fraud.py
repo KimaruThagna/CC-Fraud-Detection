@@ -25,6 +25,7 @@ label = cc_data[target]
 print(features['Amount'].describe())
 # sns.distplot(cc_data.Amount.values, color='b') # data isnt in bell curve hence, will be using normalization techniques
 # sns.scatterplot(x=features['Amount'],y=label, data=cc_data, hue='Class')
+#sns.countplot('Class', data=cc_data)
 # plt.show()
 
 # scale the amount and drop previous column
@@ -32,12 +33,21 @@ cc_data['scaled_amount'] = RobustScaler().fit_transform(cc_data.Amount.values.re
 cc_data.drop(['Amount'],axis=1,inplace=True)
 print(cc_data.head())
 X = cc_data.loc[:, cc_data.columns!='Class']
-y = cc_data.iloc[:,-1]
-print(X.shape)
-print(y.shape)
-X_train, y_train, x_test, y_test = train_test_split(X, y)
+X_train, x_test, y_train, y_test = train_test_split(X, label)
 clf = LogisticRegression()
 clf.fit(X_train,y_train)
 print(clf.score(x_test,y_test))
-print(r2_score(y_test,clf.predict(x_test)))
+# BALANCE THE CLASSES
+# shuffle dataset first
+cc_data = cc_data.sample(frac=1)
+fraud_cc_data = cc_data.loc[cc_data['Class'] == 1]
+non_fraud_cc_data = cc_data.loc[cc_data['Class'] == 0][:492]
 
+normal_distributed_df = pd.concat([fraud_cc_data, non_fraud_cc_data])
+
+# Shuffle dataframe rows
+new_df = normal_distributed_df.sample(frac=1, random_state=42)
+
+print(new_df.head())
+sns.countplot('Class', data=new_df)
+plt.show()
